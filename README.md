@@ -1,10 +1,10 @@
-# 📡 Local Network Chat — Encrypted, Ephemeral Group Chat
+#  Local Network Chat — Encrypted, Ephemeral Group Chat
 
 A **real-time encrypted chat application** that works over your **local network (LAN/WiFi)**. Messages are encrypted end-to-end — the server never sees your actual messages. All messages are ephemeral (temporary) and auto-delete after 5 minutes.
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [What is This Project?](#what-is-this-project)
 - [Features](#features)
@@ -16,7 +16,7 @@ A **real-time encrypted chat application** that works over your **local network 
 - [Socket Events — Complete List](#socket-events--complete-list)
 - [How to Run](#how-to-run)
 - [File-by-File Explanation](#file-by-file-explanation)
-- [Interview Questions & Answers](#interview-questions--answers)
+
 
 ---
 
@@ -38,14 +38,14 @@ This is a **local network group chat app**. Think of it like WhatsApp, but:
 
 | Feature | Description |
 |---------|-------------|
-| 🔐 End-to-End Encryption | XSalsa20-Poly1305 encryption using TweetNaCl |
-| ⏱️ Ephemeral Messages | Auto-delete after 5 minutes |
-| 👥 Real-time Member Count | See who's online |
-| ⌨️ Typing Indicators | See when someone is typing |
-| 🔄 Auto-Reconnection | Reconnects automatically if connection drops |
-| 📱 Responsive Design | Works on desktop, tablet, and mobile |
-| 🌐 LAN Access | Any device on the same WiFi can join |
-| 🚫 Zero Storage | Server never stores messages or user data |
+|  End-to-End Encryption | XSalsa20-Poly1305 encryption using TweetNaCl |
+|  Ephemeral Messages | Auto-delete after 5 minutes |
+|  Real-time Member Count | See who's online |
+|  Typing Indicators | See when someone is typing |
+|  Auto-Reconnection | Reconnects automatically if connection drops |
+|  Responsive Design | Works on desktop, tablet, and mobile |
+|  LAN Access | Any device on the same WiFi can join |
+|  Zero Storage | Server never stores messages or user data |
 
 ---
 
@@ -313,70 +313,6 @@ You should see: `✓ Ready on http://localhost:3000`
 cd web
 node --test test/socket.test.js
 ```
-
----
-
-## File-by-File Explanation
-
-### `server/index.js` — Main Server
-
-The heart of the backend. It does 3 things:
-1. **Creates an HTTP server** with a `/health` endpoint for debugging
-2. **Creates a Socket.IO server** on top of it for real-time communication
-3. **Handles socket events:** join, send-message, typing, disconnect, emergency-wipe
-
-**Key concept:** The server is a **relay** — it forwards encrypted data between users without ever reading it.
-
-### `server/rooms.js` — Room Management
-
-Manages who is in which room using JavaScript `Map` objects:
-- `addMember()` — Adds a user to a room
-- `removeMember()` — Removes a user; deletes room if empty
-- `getMembers()` — Returns list of all users in a room
-- `hasMember()` — Checks if a user is already in a room
-- `findRoomBySocket()` — Finds which room a user is in (used on disconnect)
-- `roomStats()` — Returns debug info about all rooms
-
-**Key concept:** Everything is in-memory. Server restart = all data gone. This is intentional for privacy.
-
-### `web/lib/crypto.js` — Encryption
-
-Three functions:
-- `deriveRoomKey(roomCode)` — Creates a 32-byte encryption key from the room name
-- `encryptMessage(key, plaintext)` — Encrypts a message → returns `{ ciphertext, iv }`
-- `decryptMessage(key, ciphertext, iv)` — Decrypts back to plaintext
-
-**Key concept:** Uses TweetNaCl's `secretbox` (XSalsa20-Poly1305). Anyone with the room code can derive the same key.
-
-### `web/lib/socket.js` — Socket Connection
-
-Two functions:
-- `getServerUrl()` — Detects whether to connect to `localhost` or a LAN IP
-- `getSocket()` — Returns a singleton Socket.IO connection (created once, reused everywhere)
-
-**Key concept:** Singleton pattern prevents creating duplicate connections.
-
-### `web/app/page.js` — Chat UI
-
-The main React component. Handles:
-- Connecting to the server and joining the room
-- Encrypting and sending messages
-- Receiving and decrypting messages
-- Showing who's online and who's typing
-- Auto-deleting messages after 5 minutes
-- Reconnecting when the browser tab regains focus
-
-### `web/app/layout.js` — Root Layout
-
-Next.js root layout that wraps every page with HTML structure, loads the Inter font, and imports global CSS.
-
-### `web/app/globals.css` — Styles
-
-All CSS for the chat UI: header, status bar, message bubbles, typing indicator, input bar, and responsive breakpoints.
-
-### `web/next.config.js` — Next.js Config
-
-Enables strict mode and whitelists LAN IP ranges so other devices can access the dev server.
 
 ---
 

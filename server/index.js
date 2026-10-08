@@ -48,6 +48,12 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "connected",
+  });
+});
+
 // We only have one URL endpoint: "/health"
 // This lets you check if the server is running by visiting http://localhost:4000/health
 app.get("/health", (req, res) => {
