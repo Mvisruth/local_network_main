@@ -24,12 +24,14 @@ import { io } from "socket.io-client";
 // HOW IT WORKS:
 // If you opened the web app at "http://192.168.31.56:3000",
 // then the server must be at "http://192.168.31.56:4000"
+//https://local-network-chat-server.onrender.com/  render url . backend deploy in render 
 // (same IP address, just different port number)
 export function getServerUrl() {
   // If we're running on the server side (not in a browser), use localhost
   // "window" only exists in browsers, not in Node.js
+  const SERVER_URL = "https://local-network-chat-server.onrender.com";
   if (typeof window === "undefined") {
-    return "http://localhost:4000";
+    return SERVER_URL;
   }
 
   // In the browser: use the same hostname that the page was loaded from
