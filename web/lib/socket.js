@@ -3,64 +3,73 @@
 // =============================================
 //
 // WHAT THIS FILE DOES:
-// - Figures out where the chat server is running
-// - Creates a single shared Socket.IO connection
-// - Uses a "singleton" pattern (only one socket connection ever exists)
+// - Connects the frontend to the Socket.IO backend
+// - Creates one shared Socket.IO connection
+// - Uses a "singleton" pattern
 //
-// WHY WE NEED THIS:
-// The chat server runs on port 4000, but the web app runs on port 3000.
-// This file makes sure the browser connects to the right server,
-// whether you're on localhost or another device on the LAN.
+// PRODUCTION BACKEND:
+// https://local-network-chat-server.onrender.com
+//
+// The frontend can be running on:
+// - localhost
+// - another device
+// - Vercel
+//
+// In all cases, the Socket.IO connection goes to
+// the deployed Render backend.
 
 import { io } from "socket.io-client";
 
-// ── getServerUrl ──
-// Figures out the URL of the chat server.
+// ── Server URL ─────────────────────────────────
 //
-// Example results:
-//   - On your computer:       "http://localhost:4000"
-//   - On a phone via WiFi:    "http://192.168.31.56:4000"
+// This is the deployed Node.js + Socket.IO backend.
+const SERVER_URL = "https://local-network-chat-server.onrender.com";
+
+// ── getServerUrl ───────────────────────────────
 //
-// HOW IT WORKS:
-// If you opened the web app at "http://192.168.31.56:3000",
-// then the server must be at "http://192.168.31.56:4000"
-//https://local-network-chat-server.onrender.com/  render url . backend deploy in render 
-// (same IP address, just different port number)
+// Returns the backend URL.
+//
+// We don't need to check window.location here because
+// the backend is now deployed separately on Render.
 export function getServerUrl() {
-  // If we're running on the server side (not in a browser), use localhost
-  // "window" only exists in browsers, not in Node.js
-  const SERVER_URL = "https://local-network-chat-server.onrender.com";
-  if (typeof window === "undefined") {
-    return SERVER_URL;
-  }
-
-  // In the browser: use the same hostname that the page was loaded from
-  const protocol = window.location.protocol; // "http:" or "https:"
-  const hostname = window.location.hostname;  // e.g., "localhost" or "192.168.31.56"
-  const serverUrl = `${protocol}//${hostname}:4000`;
-
-  return serverUrl;
+  return SERVER_URL;
 }
 
-// ── Singleton Socket ──
-// We only want ONE socket connection for the entire app.
-// This variable stores it so we don't create duplicates.
+// ── Singleton Socket ───────────────────────────
+//
+// We only want ONE Socket.IO connection for the app.
+//
+// Initially there is no socket.
 let socket = null;
 
-// ── getSocket ──
-// Returns the socket connection. Creates it the first time it's called.
-// Every time after that, it returns the same socket.
+// ── getSocket ──────────────────────────────────
+//
+// Creates the socket the first time this function is called.
+//
+// After that, it returns the same socket object.
 export function getSocket() {
   if (socket === null) {
-    // First time — create the socket connection
+    // Create the Socket.IO connection
     socket = io(getServerUrl(), {
-      autoConnect: false,           // Don't connect immediately — we'll call connect() manually
-      reconnection: true,           // Automatically try to reconnect if connection drops
-      reconnectionAttempts: Infinity, // Never give up trying to reconnect
-      reconnectionDelay: 1000,      // Wait 1 second before first retry
-      reconnectionDelayMax: 5000,   // Maximum wait between retries: 5 seconds
+      // Don't connect immediately.
+      // page.js will call socket.connect().
+      autoConnect: false,
+
+      // Automatically try to reconnect
+      // if the connection is lost.
+      reconnection: true,
+
+      // Keep trying forever.
+      reconnectionAttempts: Infinity,
+
+      // Wait 1 second before the first retry.
+      reconnectionDelay: 1000,
+
+      // Don't wait more than 5 seconds between retries.
+      reconnectionDelayMax: 5000,
     });
   }
 
+  // Return the existing socket.
   return socket;
 }
