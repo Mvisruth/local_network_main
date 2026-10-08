@@ -1,0 +1,25 @@
+# Dependencies (installed via npm install — don't commit these)
+node_modules/
+
+# Next.js build output (auto-generated when you run the app)
+.next/
+out/
+
+# Environment variables (may contain secrets)
+.env
+.env.local
+.env.production
+
+# OS-generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Debug logs
+npm-debug.log*
